@@ -5,26 +5,65 @@
 //  Created by Martin Maly on 2018-10-27.
 //  Copyright © 2018 Martin Maly. All rights reserved.
 //
-// 
+// MODEL
 
 import UIKit
 
 class ViewController: UIViewController {
     
 
-    lazy var game = Concentration(numberOfPairsOfCards: (cardButtons.count + 1) / 2)
-    
+    private lazy var game = Concentration(numberOfPairsOfCards: numberOfPairsOfCards)
+    var numberOfPairsOfCards: Int {
+            return (cardButtons.count + 1) / 2
+    }
     var emojiChoices = ["🦇","😱","🙀","😈","🎃","👻","🍭","🍬","🍎"]
     var colorChoices = [#colorLiteral(red: 1, green: 1, blue: 1, alpha: 1), #colorLiteral(red: 1, green: 0.5781051517, blue: 0, alpha: 1), #colorLiteral(red: 0, green: 0, blue: 0, alpha: 1)]
     var didStartNewGame: Bool = false
     var emoji = [Int:String]()
+    var timer = Timer()
+    var counter = 0
+    var isFirstClick: Bool = true
     
-    @IBOutlet weak var newGameButton: UIButton!
-    @IBOutlet var cardButtons: [UIButton]!
-    @IBOutlet weak var flipCountLabel: UILabel!
-    @IBOutlet weak var scoreCountLabel: UILabel!
     
-    @IBAction func touchCard(_ sender: UIButton) {
+    @IBOutlet weak var promptLabel: UILabel!
+    @IBOutlet weak var timerLabel: UILabel!
+    @IBOutlet private weak var newGameButton: UIButton!
+    @IBOutlet private var cardButtons: [UIButton]!
+    @IBOutlet private weak var flipCountLabel: UILabel!
+    @IBOutlet private weak var scoreCountLabel: UILabel!
+    
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        for button in cardButtons {
+            button.layer.cornerRadius = 8
+            
+        }
+    }
+    
+    @objc func action() {
+        counter += 1
+        timerLabel.text = String("Timer: \(counter)")
+    }
+    
+    @IBAction private func touchCard(_ sender: UIButton) {
+        
+        if isFirstClick {
+            timer = Timer.scheduledTimer(timeInterval: 1, target: self, selector: #selector(action), userInfo: nil, repeats: true)
+            promptLabel.text = ""
+            isFirstClick = false
+        } else {
+            timer.invalidate()
+            if counter > 3 {
+                promptLabel.text = "You took over 3 seconds, an extra point is deducted!"
+                game.score = game.score - 1
+            }
+            counter = 0
+            timerLabel.text = "Timer: 0"
+            isFirstClick = true
+        }
+        
         if let cardNumber = cardButtons.index(of: sender) {
             game.chooseCard(at: cardNumber)
             updateViewFromModel()
@@ -33,7 +72,10 @@ class ViewController: UIViewController {
         }
     }
     
-    @IBAction func newGame(_ sender: Any) {
+    
+    @IBAction private func newGame(_ sender: Any) {
+        counter = 0
+        timer.invalidate()
         didStartNewGame = true
         game.flipCount = 0
         for button in cardButtons {
@@ -44,7 +86,7 @@ class ViewController: UIViewController {
     }
     
 
-    func updateViewFromModel() {
+    private func updateViewFromModel() {
         flipCountLabel.text = "Flips: \(game.flipCount)"
         scoreCountLabel.text = "Score: \(game.score)"
         
@@ -56,6 +98,8 @@ class ViewController: UIViewController {
             view.backgroundColor = colorChoices[2]
             flipCountLabel.textColor = colorChoices[1]
             scoreCountLabel.textColor = colorChoices[1]
+            timerLabel.textColor = colorChoices[1]
+            promptLabel.textColor = colorChoices[1]
             newGameButton.setTitleColor(colorChoices[2], for: .normal)
             newGameButton.backgroundColor = colorChoices[1]
             for button in cardButtons {
@@ -77,7 +121,7 @@ class ViewController: UIViewController {
         }
     }
     
-    func emoji(for card: Card) -> String {
+    private func emoji(for card: Card) -> String {
         if emojiChoices.count > 0 {
             if emoji[card.identifier] == nil {
                 let randomIndex = Int.random(in: 0...emojiChoices.count - 1)
@@ -87,10 +131,6 @@ class ViewController: UIViewController {
         return emoji[card.identifier] ?? "?"
     }
     
-    
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        // Do any additional setup after loading the view, typically from a nib.
-    }
 }
+
 

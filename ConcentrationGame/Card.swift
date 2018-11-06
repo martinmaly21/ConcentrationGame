@@ -5,7 +5,7 @@
 //  Created by Martin Maly on 2018-10-27.
 //  Copyright © 2018 Martin Maly. All rights reserved.
 //
-//
+// CONTROLLER
 
 import Foundation
 
@@ -15,9 +15,9 @@ struct Card {
     var isMatched = false
     var identifier: Int
     
-    static var identifierFactory = 0
+    private static var identifierFactory = 0
     
-    static func getUniqueIdentifier() -> Int {
+    private static func getUniqueIdentifier() -> Int {
         Card.identifierFactory += 1
         return Card.identifierFactory
     }

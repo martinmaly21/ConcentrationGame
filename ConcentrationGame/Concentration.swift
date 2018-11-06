@@ -18,25 +18,50 @@ class Concentration {
     var flipCount = 0
     var score = 0
     var viewedCardsIndex = [Int]()
-    var indexOfOneAndOnlyFaceUpCard: Int?
     var lastEventTime: Date?
-    var isFirstClick: Bool = true
-    var time1: Date?
-    var time2: Date?
+//    var isFirstClick: Bool = true
+//    var time1: Date?
+//    var time2: Date?
     var totalTimeBetween: Double = 0
+
+  
+    
+    private var indexOfOneAndOnlyFaceUpCard: Int? {
+        get {
+            var foundIndex: Int?
+            for index in cards.indices {
+                if cards[index].isFaceUp {
+                    if foundIndex == nil {
+                        foundIndex = index
+                    } else {
+                    return nil
+                    }
+                }
+            }
+            return foundIndex
+        }
+        
+        set {
+            for index in cards.indices {
+                cards[index].isFaceUp = (index == newValue)
+            }
+        }
+    }
+    
+
     
     func chooseCard(at index: Int) {
-        
-        if isFirstClick {
-            time1 = Date()
-        } else {
-            time2 = Date()
-            print("time1: \(time1!) , time2: \(time2!)")
-            totalTimeBetween = time2!.timeIntervalSince(time1!)
-            time1 = nil
-            time2 = nil
-        }
-        isFirstClick = !isFirstClick
+    
+//        if isFirstClick {
+//            time1 = Date()
+//        } else {
+//            time2 = Date()
+//            print("time1: \(time1!) , time2: \(time2!)")
+//            totalTimeBetween = time2!.timeIntervalSince(time1!)
+//            time1 = nil
+//            time2 = nil
+//        }
+//        isFirstClick = !isFirstClick
         
         flipCount += 1
         if  cards[index].isMatched == false {
@@ -45,19 +70,16 @@ class Concentration {
                     cards[matchIndex].isMatched = true
                     cards[index].isMatched = true
                     
-                    if totalTimeBetween < 2 {
+//                    if totalTimeBetween < 1 {
+//                        score += 5
+//                    } else if totalTimeBetween < 2 {
+//                        score += 3
+//                    } else {
                         score += 5
-                    } else {
-                        score += 1
-                    }
+//                    }
                 }
                 cards[index].isFaceUp = true
-                indexOfOneAndOnlyFaceUpCard = nil
             } else {
-                for flipDownIndex in cards.indices {
-                    cards[flipDownIndex].isFaceUp = false
-                }
-                cards[index].isFaceUp = true
                 indexOfOneAndOnlyFaceUpCard = index
             }
         }
@@ -67,6 +89,7 @@ class Concentration {
         }
         viewedCardsIndex.append(index)
     }
+    
     
     init(numberOfPairsOfCards: Int) {
         
